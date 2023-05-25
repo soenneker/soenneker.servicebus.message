@@ -42,7 +42,7 @@
 
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 
-        <PackageReference Include="Soenneker.Messages.Base" Version="1.0.14" />
+        <PackageReference Include="Soenneker.Messages.Base" Version="1.0.16" />
 
         <PackageReference Include="Soenneker.Utils.Json" Version="1.0.52" />
     </ItemGroup>
