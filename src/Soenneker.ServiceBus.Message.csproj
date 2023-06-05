@@ -44,7 +44,7 @@
 
         <PackageReference Include="Soenneker.Extensions.MemoryStream" Version="1.0.12" />
 
-        <PackageReference Include="Soenneker.Messages.Base" Version="1.0.32" />
+        <PackageReference Include="Soenneker.Messages.Base" Version="1.0.34" />
 
         <PackageReference Include="Soenneker.Utils.Json" Version="1.0.78" />
     </ItemGroup>
