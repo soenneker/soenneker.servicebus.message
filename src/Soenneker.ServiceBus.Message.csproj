@@ -42,7 +42,7 @@
 
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 
-        <PackageReference Include="Soenneker.Extensions.MemoryStream" Version="1.0.13" />
+        <PackageReference Include="Soenneker.Extensions.MemoryStream" Version="1.0.15" />
 
         <PackageReference Include="Soenneker.Messages.Base" Version="1.0.39" />
 
