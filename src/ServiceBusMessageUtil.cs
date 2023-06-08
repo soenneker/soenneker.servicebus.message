@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using Soenneker.Enums.JsonLibrary;
 using Soenneker.Enums.JsonOptions;
 using Soenneker.Extensions.MemoryStream;
@@ -27,24 +28,22 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
     private const int _messageLimitBytes = 260096;
 
     private readonly ILogger<ServiceBusMessageUtil> _logger;
-    private readonly IMemoryStreamUtil _memoryStreamUtil;
 
-    public ServiceBusMessageUtil(IConfiguration config, ILogger<ServiceBusMessageUtil> logger, IMemoryStreamUtil memoryStreamUtil)
+    public ServiceBusMessageUtil(IConfiguration config, ILogger<ServiceBusMessageUtil> logger)
     {
         _logger = logger;
-        _memoryStreamUtil = memoryStreamUtil;
 
         _log = config.GetValue<bool>("Azure:ServiceBus:Log");
 
         _jsonOptionType = _log ? JsonOptionType.Pretty : JsonOptionType.Web;
     }
 
-    public async ValueTask<ServiceBusMessage?> BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message
+    public async Task<ServiceBusMessage?> BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message
     {
         if (message.NewtonsoftSerialize)
             return BuildMessageViaNewtonsoft(message, type);
 
-        ServiceBusMessage? result = await BuildMessageViaSystemTextJson(message, type).ConfigureAwait(false);
+        ServiceBusMessage? result = await BuildMessageViaSystemTextJson(message, type);
 
         return result;
     }
@@ -53,12 +52,15 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
     {
         string? serializedMessage = null;
 
+        MemoryStream? stream = null;
+
         try
         {
-            using MemoryStream memoryStream = await _memoryStreamUtil.Get();
-            await JsonUtil.SerializeIntoStream(memoryStream, message, _jsonOptionType);
+            stream = new MemoryStream();
 
-            long serializedMessageBytes = memoryStream.Length;
+            await JsonUtil.SerializeIntoStream(stream, message, _jsonOptionType);
+
+            long serializedMessageBytes = stream.Length;
 
             if (serializedMessageBytes > _messageLimitBytes)
             {
@@ -72,7 +74,7 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
                 _logger.LogDebug("== SERVICEBUS: Creating message ({name}), message: {message}", type.Name, serializedMessage);
             }
 
-            var serviceBusMessage = new ServiceBusMessage(memoryStream.ToReadOnlyMemoryBytes());
+            var serviceBusMessage = new ServiceBusMessage(stream.ToReadOnlyMemoryBytes());
             serviceBusMessage.ApplicationProperties.Add("type", type.AssemblyQualifiedName);
 
             return serviceBusMessage;
@@ -82,6 +84,11 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
             serializedMessage ??= JsonUtil.Serialize(message, _jsonOptionType);
             _logger.LogCritical(e, "== SERVICEBUS: Error building service bus message type: {type} message: {message}", type.ToString(), serializedMessage);
             return null;
+        }
+        finally
+        {
+            if (stream != null)
+                await stream.DisposeAsync();
         }
     }
 
