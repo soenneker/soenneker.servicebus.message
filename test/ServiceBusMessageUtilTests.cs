@@ -32,7 +32,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
     {
         int iterations = 10000;
 
-        List<TestMessage> messages = new List<TestMessage>(iterations);
+        var messages = new List<TestMessage>(iterations);
 
         for (int i = 0; i < iterations; i++)
         {
@@ -49,7 +49,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         foreach (var message in messages)
         {
-           // output.WriteLine(message.Contents);
+            // output.WriteLine(message.Contents);
         }
 
         _output.WriteLine($"count: {messages.Count}");
@@ -87,9 +87,9 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         for (int i = 0; i < results.Count; i++)
         {
-            var str = results[i].Body.ToString();
+            var str = results[i]!.Body.ToString();
             var objDeserialized = JsonUtil.Deserialize<TestMessage>(str);
-            deserialized.Add(objDeserialized);
+            deserialized.Add(objDeserialized!);
         }
 
         deserialized = deserialized.OrderBy(c => c.Contents).ToList();
@@ -98,7 +98,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         foreach (var message in deserialized)
         {
-        //    output.WriteLine(message.Contents);
+            //    output.WriteLine(message.Contents);
         }
 
         _output.WriteLine($"count: {deserialized.Count}");
@@ -116,7 +116,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
     {
         int iterations = 1000;
 
-        List<TestMessage> messages = new List<TestMessage>(iterations);
+        var messages = new List<TestMessage>(iterations);
 
         for (int i = 0; i < iterations; i++)
         {
@@ -146,9 +146,9 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         for (int i = 0; i < results.Count - 1; i++)
         {
-            var str = results[i].Body.ToString();
+            var str = results[i]!.Body.ToString();
             var objDeserialized = JsonUtil.Deserialize<TestMessage>(str);
-            deserialized.Add(objDeserialized);
+            deserialized.Add(objDeserialized!);
         }
 
         for (int i = 0; i < results.Count - 1; i++)
@@ -164,7 +164,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
     {
         int iterations = 1000;
 
-        List<TestMessage> messages = new List<TestMessage>(iterations);
+        var messages = new List<TestMessage>(iterations);
 
         for (int i = 0; i < iterations; i++)
         {
@@ -189,9 +189,9 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         for (int i = 0; i < results.Count - 1; i++)
         {
-            var str = results[i].Body.ToString();
+            var str = results[i]!.Body.ToString();
             var objDeserialized = JsonUtil.Deserialize<TestMessage>(str);
-            deserialized.Add(objDeserialized);
+            deserialized.Add(objDeserialized!);
         }
 
         for (int i = 0; i < results.Count - 1; i++)

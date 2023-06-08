@@ -1,18 +1,14 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.IO;
 using Soenneker.Enums.JsonLibrary;
 using Soenneker.Enums.JsonOptions;
-using Soenneker.Extensions.MemoryStream;
 using Soenneker.ServiceBus.Message.Abstract;
 using Soenneker.Utils.Json;
-using Soenneker.Utils.MemoryStream.Abstract;
 
 namespace Soenneker.ServiceBus.Message;
 
@@ -52,15 +48,11 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
     {
         string? serializedMessage = null;
 
-        MemoryStream? stream = null;
-
         try
         {
-            stream = new MemoryStream();
+            serializedMessage = JsonUtil.Serialize(message, _jsonOptionType);
 
-            await JsonUtil.SerializeIntoStream(stream, message, _jsonOptionType);
-
-            long serializedMessageBytes = stream.Length;
+            long serializedMessageBytes = serializedMessage!.Length;
 
             if (serializedMessageBytes > _messageLimitBytes)
             {
@@ -74,7 +66,7 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
                 _logger.LogDebug("== SERVICEBUS: Creating message ({name}), message: {message}", type.Name, serializedMessage);
             }
 
-            var serviceBusMessage = new ServiceBusMessage(stream.ToReadOnlyMemoryBytes());
+            var serviceBusMessage = new ServiceBusMessage(serializedMessage);
             serviceBusMessage.ApplicationProperties.Add("type", type.AssemblyQualifiedName);
 
             return serviceBusMessage;
@@ -83,12 +75,8 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
         {
             serializedMessage ??= JsonUtil.Serialize(message, _jsonOptionType);
             _logger.LogCritical(e, "== SERVICEBUS: Error building service bus message type: {type} message: {message}", type.ToString(), serializedMessage);
+            await Task.CompletedTask;
             return null;
-        }
-        finally
-        {
-            if (stream != null)
-                await stream.DisposeAsync();
         }
     }
 
