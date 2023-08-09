@@ -36,7 +36,7 @@
         <None Include="..\README.md" Pack="true" PackagePath="\" />
         <None Include="..\LICENSE" Pack="true" PackagePath="\" />
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
-        <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.15.0" />
+        <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.16.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
 
@@ -45,6 +45,6 @@
 
         <PackageReference Include="Soenneker.Messages.Base" Version="1.0.80" />
 
-        <PackageReference Include="Soenneker.Utils.Json" Version="1.0.160" />
+        <PackageReference Include="Soenneker.Utils.Json" Version="1.0.164" />
     </ItemGroup>
 </Project>
