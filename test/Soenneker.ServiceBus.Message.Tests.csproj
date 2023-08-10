@@ -9,7 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
-        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="1.0.162" />
+        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="1.0.166" />
         <PackageReference Include="Soenneker.Utils.Test" Version="1.0.33" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
