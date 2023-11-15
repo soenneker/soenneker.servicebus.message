@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,7 +51,9 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
 
         try
         {
-            serializedMessage = JsonUtil.Serialize(message, _jsonOptionType);
+            var stream = new MemoryStream();
+
+            await JsonUtil.SerializeIntoStream(stream, message, _jsonOptionType);
 
             long serializedMessageBytes = serializedMessage!.Length;
 
@@ -66,7 +69,7 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
                 _logger.LogDebug("== SERVICEBUS: Creating message ({name}), message: {message}", type.Name, serializedMessage);
             }
 
-            var serviceBusMessage = new ServiceBusMessage(serializedMessage);
+            var serviceBusMessage = new ServiceBusMessage(stream.GetBuffer());
             serviceBusMessage.ApplicationProperties.Add("type", type.AssemblyQualifiedName);
 
             return serviceBusMessage;
