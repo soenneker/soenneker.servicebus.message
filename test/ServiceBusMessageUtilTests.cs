@@ -28,18 +28,29 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
     }
 
     [Fact]
+    public async Task BuildMessage_should_build_a_message()
+    {
+        var testMessage = new TestMessage("");
+        testMessage.Contents = "blah";
+
+        ServiceBusMessage? result = await _util.BuildMessage(testMessage, typeof(TestMessage));
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
     public async Task Parallel_serialization_should_deserialize_all()
     {
-        int iterations = 10000;
+        const int iterations = 10000;
 
         var messages = new List<TestMessage>(iterations);
 
-        for (int i = 0; i < iterations; i++)
+        for (var i = 0; i < iterations; i++)
         {
             var message = new TestMessage("queue")
             {
                 Contents = Faker.Random.AlphaNumeric(50)
             };
+
             messages.Add(message);
         }
 
@@ -47,7 +58,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         messages = messages.OrderBy(c => c.Contents).ToList();
 
-        foreach (var message in messages)
+        foreach (TestMessage message in messages)
         {
             // output.WriteLine(message.Contents);
         }
@@ -56,9 +67,9 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         var parallelTasks = new List<Task<ServiceBusMessage?>>();
 
-        for (int i = 0; i < iterations; i++)
+        for (var i = 0; i < iterations; i++)
         {
-            var task = _util.BuildMessage(messages[i], typeof(TestMessage));
+            Task<ServiceBusMessage?> task = _util.BuildMessage(messages[i], typeof(TestMessage));
             parallelTasks.Add(task);
         }
 
@@ -79,13 +90,13 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
             concurrentBag.Add(result);
         });
 
-        var results = concurrentBag.ToList();
+        List<ServiceBusMessage> results = concurrentBag.ToList();
 
         var deserialized = new List<TestMessage>();
 
         _output.WriteLine($"count: {results.Count}");
 
-        for (int i = 0; i < results.Count; i++)
+        for (var i = 0; i < results.Count; i++)
         {
             var str = results[i]!.Body.ToString();
             var objDeserialized = JsonUtil.Deserialize<TestMessage>(str);
@@ -96,14 +107,14 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         _output.WriteLine("-------------------");
 
-        foreach (var message in deserialized)
+        foreach (TestMessage message in deserialized)
         {
             //    output.WriteLine(message.Contents);
         }
 
         _output.WriteLine($"count: {deserialized.Count}");
 
-        for (int i = 0; i < results.Count - 1; i++)
+        for (var i = 0; i < results.Count - 1; i++)
         {
             messages[i].Contents.Should().Be(deserialized[i].Contents);
         }
@@ -114,11 +125,11 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
     [Fact]
     public async Task Sync_serialization_should_deserialize_all()
     {
-        int iterations = 1000;
+        const int iterations = 1000;
 
         var messages = new List<TestMessage>(iterations);
 
-        for (int i = 0; i < iterations; i++)
+        for (var i = 0; i < iterations; i++)
         {
             var message = new TestMessage("queue")
             {
@@ -129,9 +140,9 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         var parallelTasks = new List<Task<ServiceBusMessage?>>();
 
-        for (int i = 0; i < iterations; i++)
+        for (var i = 0; i < iterations; i++)
         {
-            var task = _util.BuildMessage(messages[i], typeof(TestMessage));
+            Task<ServiceBusMessage?> task = _util.BuildMessage(messages[i], typeof(TestMessage));
             parallelTasks.Add(task);
         }
 
@@ -144,14 +155,14 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         var deserialized = new List<TestMessage>(iterations);
 
-        for (int i = 0; i < results.Count - 1; i++)
+        for (var i = 0; i < results.Count - 1; i++)
         {
             var str = results[i]!.Body.ToString();
             var objDeserialized = JsonUtil.Deserialize<TestMessage>(str);
             deserialized.Add(objDeserialized!);
         }
 
-        for (int i = 0; i < results.Count - 1; i++)
+        for (var i = 0; i < results.Count - 1; i++)
         {
             messages[i].Contents.Should().Be(deserialized[i].Contents);
         }
@@ -162,11 +173,11 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
     [Fact]
     public async Task Async_serialization_should_deserialize_all()
     {
-        int iterations = 1000;
+        const int iterations = 1000;
 
         var messages = new List<TestMessage>(iterations);
 
-        for (int i = 0; i < iterations; i++)
+        for (var i = 0; i < iterations; i++)
         {
             var message = new TestMessage("queue")
             {
@@ -177,9 +188,9 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         var parallelTasks = new List<Task<ServiceBusMessage?>>();
 
-        for (int i = 0; i < iterations; i++)
+        for (var i = 0; i < iterations; i++)
         {
-            var task = _util.BuildMessage(messages[i], typeof(TestMessage));
+            Task<ServiceBusMessage?> task = _util.BuildMessage(messages[i], typeof(TestMessage));
             parallelTasks.Add(task);
         }
 
@@ -187,14 +198,14 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 
         var deserialized = new List<TestMessage>(iterations);
 
-        for (int i = 0; i < results.Count - 1; i++)
+        for (var i = 0; i < results.Count - 1; i++)
         {
             var str = results[i]!.Body.ToString();
             var objDeserialized = JsonUtil.Deserialize<TestMessage>(str);
             deserialized.Add(objDeserialized!);
         }
 
-        for (int i = 0; i < results.Count - 1; i++)
+        for (var i = 0; i < results.Count - 1; i++)
         {
             messages[i].Contents.Should().Be(deserialized[i].Contents);
         }
