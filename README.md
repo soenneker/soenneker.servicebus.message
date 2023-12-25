@@ -8,5 +8,5 @@
 ## Installation
 
 ```
-Install-Package Soenneker.ServiceBus.Message
+dotnet add package Soenneker.ServiceBus.Message
 ```
