@@ -45,6 +45,6 @@
 
         <PackageReference Include="Soenneker.Messages.Base" Version="2.1.390" />
 
-        <PackageReference Include="Soenneker.Utils.Json" Version="2.1.905" />
+        <PackageReference Include="Soenneker.Utils.Json" Version="2.1.906" />
     </ItemGroup>
 </Project>
