@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -34,17 +33,17 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
         _jsonOptionType = _log ? JsonOptionType.Pretty : JsonOptionType.Web;
     }
 
-    public async Task<ServiceBusMessage?> BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message
+    public ServiceBusMessage? BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message
     {
         if (message.NewtonsoftSerialize)
             return BuildMessageViaNewtonsoft(message, type);
 
-        ServiceBusMessage? result = await BuildMessageViaSystemTextJson(message, type);
+        ServiceBusMessage? result = BuildMessageViaSystemTextJson(message, type);
 
         return result;
     }
 
-    private async ValueTask<ServiceBusMessage?> BuildMessageViaSystemTextJson<TMessage>(TMessage message, Type type)
+    private ServiceBusMessage? BuildMessageViaSystemTextJson<TMessage>(TMessage message, Type type)
     {
         string? serializedMessage = null;
 
@@ -53,21 +52,18 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
             serializedMessage = JsonUtil.Serialize(message, _jsonOptionType);
 
             if (serializedMessage == null)
-                throw new SerializationException($"== SERVICEBUS: Couldn't serialize message of type {type.FullName}");
+                throw new SerializationException($"== ServiceBusMessageUtil: Couldn't serialize message of type {type.FullName}");
 
             long serializedMessageBytes = serializedMessage.Length;
 
             if (serializedMessageBytes > _messageLimitBytes)
             {
-                _logger.LogError("== SERVICEBUS: Message size is over {limit}kB limit: {messageSize}kB, skipping. type: {type}", _messageLimitBytes, serializedMessageBytes, type.ToString());
+                _logger.LogError("== ServiceBusMessageUtil: Message size is over {limit}kB limit: {messageSize}kB, skipping. type: {type}", _messageLimitBytes, serializedMessageBytes, type.ToString());
                 return null;
             }
 
             if (_log)
-            {
-                serializedMessage = JsonUtil.Serialize(message, _jsonOptionType);
-                _logger.LogDebug("== SERVICEBUS: Creating message ({name}), message: {message}", type.Name, serializedMessage);
-            }
+                _logger.LogDebug("== ServiceBusMessageUtil: Creating message ({name}), message: {message}", type.Name, serializedMessage);
 
             var serviceBusMessage = new ServiceBusMessage(serializedMessage);
             serviceBusMessage.ApplicationProperties.Add("type", type.AssemblyQualifiedName);
@@ -77,8 +73,7 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
         catch (Exception e)
         {
             serializedMessage ??= JsonUtil.Serialize(message, _jsonOptionType);
-            _logger.LogCritical(e, "== SERVICEBUS: Error building service bus message type: {type} message: {message}", type.ToString(), serializedMessage);
-            await Task.CompletedTask;
+            _logger.LogCritical(e, "== ServiceBusMessageUtil: Error building service bus message type: {type} message: {message}", type.ToString(), serializedMessage);
             return null;
         }
     }
@@ -92,18 +87,18 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
             serializedMessage = JsonUtil.Serialize(message, libraryType: JsonLibraryType.Newtonsoft);
 
             if (serializedMessage == null)
-                throw new SerializationException($"== SERVICEBUS: Couldn't serialize message of type {type.FullName}");
+                throw new SerializationException($"== ServiceBusMessageUtil: Couldn't serialize message of type {type.FullName}");
 
             int serializedMessageBytes = Encoding.UTF8.GetByteCount(serializedMessage);
 
             if (serializedMessageBytes > _messageLimitBytes)
             {
-                _logger.LogError("== SERVICEBUS: Message size is over {limit}kB limit: {messageSize}kB, skipping. type: {type}", _messageLimitBytes, serializedMessageBytes, type.ToString());
+                _logger.LogError("== ServiceBusMessageUtil: Message size is over {limit}kB limit: {messageSize}kB, skipping. type: {type}", _messageLimitBytes, serializedMessageBytes, type.ToString());
                 return null;
             }
 
             if (_log)
-                _logger.LogDebug("== SERVICEBUS: Creating message ({name}): {message}", type.Name, serializedMessage);
+                _logger.LogDebug("== ServiceBusMessageUtil: Creating message ({name}): {message}", type.Name, serializedMessage);
 
             var serviceBusMessage = new ServiceBusMessage(serializedMessage);
             serviceBusMessage.ApplicationProperties.Add("type", type.AssemblyQualifiedName);
@@ -112,7 +107,7 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
         }
         catch (Exception e)
         {
-            _logger.LogCritical(e, "== SERVICEBUS: Error building service bus message type: {type} message: {message}", type.ToString(), serializedMessage);
+            _logger.LogCritical(e, "== ServiceBusMessageUtil: Error building service bus message type: {type} message: {message}", type.ToString(), serializedMessage);
             return null;
         }
     }

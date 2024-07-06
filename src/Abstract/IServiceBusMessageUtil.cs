@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.Contracts;
-using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 
 namespace Soenneker.ServiceBus.Message.Abstract;
@@ -12,5 +11,5 @@ namespace Soenneker.ServiceBus.Message.Abstract;
 public interface IServiceBusMessageUtil
 {
     [Pure]
-    Task<ServiceBusMessage?> BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message;
+    ServiceBusMessage? BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message;
 }
