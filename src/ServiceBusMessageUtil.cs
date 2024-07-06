@@ -35,10 +35,12 @@ public class ServiceBusMessageUtil : IServiceBusMessageUtil
 
     public ServiceBusMessage? BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message
     {
-        if (message.NewtonsoftSerialize)
-            return BuildMessageViaNewtonsoft(message, type);
+        ServiceBusMessage? result;
 
-        ServiceBusMessage? result = BuildMessageViaSystemTextJson(message, type);
+        if (!message.NewtonsoftSerialize)
+            result = BuildMessageViaSystemTextJson(message, type);
+        else
+            result = BuildMessageViaNewtonsoft(message, type);
 
         return result;
     }
