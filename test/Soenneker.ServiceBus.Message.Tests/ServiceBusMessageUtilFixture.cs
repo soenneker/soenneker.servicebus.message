@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -15,7 +15,7 @@ namespace Soenneker.ServiceBus.Message.Tests;
 
 public class ServiceBusMessageUtilFixture : UnitFixture
 {
-    public override async Task InitializeAsync()
+    public override async System.Threading.Tasks.ValueTask InitializeAsync()
     {
         SetupIoC(Services);
 

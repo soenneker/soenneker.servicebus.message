@@ -1,10 +1,10 @@
-﻿using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus;
 using FluentAssertions;
 using Soenneker.ServiceBus.Message.Abstract;
 using Soenneker.ServiceBus.Message.Tests.Messages;
 using Soenneker.Tests.FixturedUnit;
 using Xunit;
-using Xunit.Abstractions;
+
 
 namespace Soenneker.ServiceBus.Message.Tests;
 
