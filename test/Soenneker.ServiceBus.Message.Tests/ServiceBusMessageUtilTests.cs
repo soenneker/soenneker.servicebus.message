@@ -13,7 +13,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
 {
     private readonly IServiceBusMessageUtil _util;
 
-    public ServiceBusMessageUtilTests(ServiceBusMessageUtilFixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
+    public ServiceBusMessageUtilTests(Fixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
     {
         _util = Resolve<IServiceBusMessageUtil>();
     }

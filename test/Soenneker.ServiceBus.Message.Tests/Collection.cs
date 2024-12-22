@@ -8,6 +8,6 @@ namespace Soenneker.ServiceBus.Message.Tests;
 /// ICollectionFixture interfaces.
 /// </summary>
 [CollectionDefinition("ServiceBusMessageUtilCollection")]
-public class ServiceBusMessageUtilCollection : ICollectionFixture<ServiceBusMessageUtilFixture>
+public class Collection : ICollectionFixture<Fixture>
 {
 }

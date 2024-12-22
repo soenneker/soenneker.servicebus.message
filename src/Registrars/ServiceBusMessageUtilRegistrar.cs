@@ -9,11 +9,13 @@ namespace Soenneker.ServiceBus.Message.Registrars;
 /// </summary>
 public static class ServiceBusMessageUtilRegistrar
 {
-    /// <summary>
-    /// As Singleton
-    /// </summary>
-    public static void AddServiceBusMessageUtil(this IServiceCollection services)
+    public static void AddServiceBusMessageUtilAsSingleton(this IServiceCollection services)
     {
         services.TryAddSingleton<IServiceBusMessageUtil, ServiceBusMessageUtil>();
+    }
+
+    public static void AddServiceBusMessageUtilAsScoped(this IServiceCollection services)
+    {
+        services.TryAddScoped<IServiceBusMessageUtil, ServiceBusMessageUtil>();
     }
 }

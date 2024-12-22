@@ -13,7 +13,7 @@ using ILogger = Serilog.ILogger;
 
 namespace Soenneker.ServiceBus.Message.Tests;
 
-public class ServiceBusMessageUtilFixture : UnitFixture
+public class Fixture : UnitFixture
 {
     public override async System.Threading.Tasks.ValueTask InitializeAsync()
     {
@@ -43,6 +43,6 @@ public class ServiceBusMessageUtilFixture : UnitFixture
         });
 
         services.AddSingleton(config);
-        services.AddServiceBusMessageUtil();
+        services.AddServiceBusMessageUtilAsSingleton();
     }
 }
