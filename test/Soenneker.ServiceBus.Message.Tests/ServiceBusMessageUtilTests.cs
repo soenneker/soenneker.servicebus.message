@@ -1,5 +1,5 @@
 using Azure.Messaging.ServiceBus;
-using FluentAssertions;
+using AwesomeAssertions;
 using Soenneker.ServiceBus.Message.Abstract;
 using Soenneker.ServiceBus.Message.Tests.Messages;
 using Soenneker.Tests.FixturedUnit;
