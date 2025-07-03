@@ -12,7 +12,7 @@ using Soenneker.Utils.Json;
 namespace Soenneker.ServiceBus.Message;
 
 ///<inheritdoc cref="IServiceBusMessageUtil"/>
-public class ServiceBusMessageUtil : IServiceBusMessageUtil
+public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
 {
     private const int _messageLimitBytes = 260096; // 256kB -  2kB (true header limit is 64kB, but this is a realistic expected value)
     private readonly bool _log;
