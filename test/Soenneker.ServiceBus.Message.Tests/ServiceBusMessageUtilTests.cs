@@ -19,6 +19,11 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
     }
 
     [Fact]
+    public void Default()
+    {
+    }
+
+    [Fact]
     public void BuildMessage_should_build_a_message()
     {
         var testMessage = new TestMessage("")
@@ -27,6 +32,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
         };
 
         ServiceBusMessage? result = _util.BuildMessage(testMessage, typeof(TestMessage));
-        result.Should().NotBeNull();
+        result.Should()
+              .NotBeNull();
     }
 }
