@@ -74,6 +74,7 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
 
     private void LogCriticalError(Exception ex, Type type, object message)
     {
-        _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}, Message: {Message}", type.FullName, JsonUtil.Serialize(message, _jsonOptionType));
+        _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}, Message: {Message}", type.FullName,
+            JsonUtil.Serialize(message, _jsonOptionType));
     }
 }
