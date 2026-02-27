@@ -51,8 +51,14 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
             if (_log)
                 _logger.LogDebug("Creating message ({Name}): {Message}", type.Name, serializedMessage);
 
-            var serviceBusMessage = new ServiceBusMessage(serializedMessage);
-            serviceBusMessage.ApplicationProperties.Add("type", type.AssemblyQualifiedName);
+            var serviceBusMessage = new ServiceBusMessage(serializedMessage)
+            {
+                ApplicationProperties =
+                {
+                    ["type"] = type.AssemblyQualifiedName ?? type.FullName ?? type.Name
+                }
+            };
+
             return serviceBusMessage;
         }
         catch (Exception ex)
