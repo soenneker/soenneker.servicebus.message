@@ -11,76 +11,124 @@ using Soenneker.Utils.Json;
 
 namespace Soenneker.ServiceBus.Message;
 
-///<inheritdoc cref="IServiceBusMessageUtil"/>
+/// <inheritdoc cref="IServiceBusMessageUtil"/>
 public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
 {
-    private const int _messageLimitBytes = 260096; // 256kB -  2kB (true header limit is 64kB, but this is a realistic expected value)
+    private const int _messageLimitBytes = 260_096;
+    private static readonly Encoding _utf8 = Encoding.UTF8;
+
     private readonly bool _log;
     private readonly JsonOptionType _jsonOptionType;
     private readonly ILogger<ServiceBusMessageUtil> _logger;
 
     public ServiceBusMessageUtil(IConfiguration config, ILogger<ServiceBusMessageUtil> logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _logger = logger;
         _log = config.GetValue<bool>("Azure:ServiceBus:Log");
         _jsonOptionType = _log ? JsonOptionType.Pretty : JsonOptionType.Web;
     }
 
-    public ServiceBusMessage? BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message
+    public ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message
     {
-        return !message.NewtonsoftSerialize
-            ? BuildMessageViaSerializer(message, type, JsonLibraryType.SystemTextJson)
-            : BuildMessageViaSerializer(message, type, JsonLibraryType.Newtonsoft);
+        return !message.NewtonsoftSerialize ? BuildMessageStjUtf8(message, type) : BuildMessageNewtonsoftString(message, type);
     }
 
-    private ServiceBusMessage? BuildMessageViaSerializer<TMessage>(TMessage message, Type type, JsonLibraryType libraryType)
+    private ServiceBusMessage? BuildMessageStjUtf8<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message
     {
         try
         {
-            string? serializedMessage = JsonUtil.Serialize(message, _jsonOptionType, libraryType);
+            byte[]? utf8Bytes = JsonUtil.SerializeToUtf8Bytes(message, _jsonOptionType);
 
-            if (serializedMessage == null)
-                throw new SerializationException($"Couldn't serialize message of type {type.FullName}");
+            if (utf8Bytes is null)
+                throw new SerializationException("Couldn't serialize message of type " + type);
 
-            if (IsMessageSizeExceedLimit(serializedMessage))
+            int size = utf8Bytes.Length;
+
+            if (size > _messageLimitBytes)
             {
-                LogError($"Message size is over limit. Type: {type.FullName}, Size: {Encoding.UTF8.GetByteCount(serializedMessage)} bytes");
+                _logger.LogError("== ServiceBusMessageUtil: Message size is over limit. Type: {Type}, Size: {SizeBytes} bytes", type, size);
+
                 return null;
             }
 
-            if (_log)
-                _logger.LogDebug("Creating message ({Name}): {Message}", type.Name, serializedMessage);
+            if (_log && _logger.IsEnabled(LogLevel.Debug))
+            {
+                string payload = _utf8.GetString(utf8Bytes);
+                _logger.LogDebug("Creating message ({Type}): {Message}", type, payload);
+            }
 
-            var serviceBusMessage = new ServiceBusMessage(serializedMessage)
+            var sbMessage = new ServiceBusMessage(utf8Bytes)
             {
                 ApplicationProperties =
                 {
-                    ["type"] = type.AssemblyQualifiedName ?? type.FullName ?? type.Name
+                    ["type"] = type
                 }
             };
 
-            return serviceBusMessage;
+            return sbMessage;
         }
         catch (Exception ex)
         {
-            LogCriticalError(ex, type, message);
+            LogCriticalError(ex, type, message, JsonLibraryType.SystemTextJson);
             return null;
         }
     }
 
-    private static bool IsMessageSizeExceedLimit(string message)
+    private ServiceBusMessage? BuildMessageNewtonsoftString<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message
     {
-        return Encoding.UTF8.GetByteCount(message) > _messageLimitBytes;
+        try
+        {
+            string? serialized = JsonUtil.Serialize(message, _jsonOptionType, JsonLibraryType.Newtonsoft);
+
+            if (serialized is null)
+                throw new SerializationException("Couldn't serialize message of type " + type);
+
+            int byteCount = _utf8.GetByteCount(serialized);
+
+            if (byteCount > _messageLimitBytes)
+            {
+                _logger.LogError("== ServiceBusMessageUtil: Message size is over limit. Type: {Type}, Size: {SizeBytes} bytes", type, byteCount);
+
+                return null;
+            }
+
+            if (_log && _logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Creating message ({Type}): {Message}", type, serialized);
+
+            var sbMessage = new ServiceBusMessage(serialized)
+            {
+                ApplicationProperties =
+                {
+                    ["type"] = type
+                }
+            };
+
+            return sbMessage;
+        }
+        catch (Exception ex)
+        {
+            LogCriticalError(ex, type, message, JsonLibraryType.Newtonsoft);
+            return null;
+        }
     }
 
-    private void LogError(string message)
+    private void LogCriticalError(Exception ex, string type, object message, JsonLibraryType libraryType)
     {
-        _logger.LogError("== ServiceBusMessageUtil: {Message}", message);
-    }
+        if (!_logger.IsEnabled(LogLevel.Critical))
+            return;
 
-    private void LogCriticalError(Exception ex, Type type, object message)
-    {
-        _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}, Message: {Message}", type.FullName,
-            JsonUtil.Serialize(message, _jsonOptionType));
+        if (_log)
+        {
+            // Serialize only if you're going to log the payload.
+            string? serialized = JsonUtil.Serialize(message, _jsonOptionType, libraryType);
+
+            _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}, Message: {Message}", type, serialized);
+        }
+        else
+        {
+            _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}", type);
+        }
     }
 }

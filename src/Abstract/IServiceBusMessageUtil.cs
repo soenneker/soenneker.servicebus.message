@@ -11,5 +11,5 @@ namespace Soenneker.ServiceBus.Message.Abstract;
 public interface IServiceBusMessageUtil
 {
     [Pure]
-    ServiceBusMessage? BuildMessage<TMessage>(TMessage message, Type type) where TMessage : Messages.Base.Message;
+    ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message;
 }
