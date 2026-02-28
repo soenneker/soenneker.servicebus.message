@@ -37,7 +37,7 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
             Contents = "blah"
         };
 
-        ServiceBusMessage? result = _util.BuildMessage(testMessage, typeof(TestMessage));
+        ServiceBusMessage? result = _util.BuildMessage(testMessage, "test");
         result.Should()
               .NotBeNull();
     }
