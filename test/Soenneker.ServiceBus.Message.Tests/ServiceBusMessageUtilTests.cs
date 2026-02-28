@@ -1,3 +1,4 @@
+using System;
 using Azure.Messaging.ServiceBus;
 using AwesomeAssertions;
 using Soenneker.ServiceBus.Message.Abstract;
@@ -26,8 +27,13 @@ public class ServiceBusMessageUtilTests : FixturedUnitTest
     [Fact]
     public void BuildMessage_should_build_a_message()
     {
-        var testMessage = new TestMessage("")
+        var testMessage = new TestMessage
         {
+            Id = Guid.NewGuid().ToString(),
+            CreatedAt = DateTimeOffset.UtcNow,
+            Queue = "test",
+            Sender = "test",
+            Type = "test",
             Contents = "blah"
         };
 
