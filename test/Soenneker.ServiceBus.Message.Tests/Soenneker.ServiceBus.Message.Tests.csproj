@@ -13,7 +13,7 @@
     </PropertyGroup>
 
     <ItemGroup><PackageReference Include="Soenneker.Tests.FixturedUnit" Version="4.0.2265" />
-        <PackageReference Include="Soenneker.Utils.Test" Version="4.0.308" /><PackageReference Include="xUnit.v3" Version="3.2.2" /></ItemGroup>
+        <PackageReference Include="Soenneker.Utils.Test" Version="4.0.313" /><PackageReference Include="xUnit.v3" Version="3.2.2" /></ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Soenneker.ServiceBus.Message\Soenneker.ServiceBus.Message.csproj" />
