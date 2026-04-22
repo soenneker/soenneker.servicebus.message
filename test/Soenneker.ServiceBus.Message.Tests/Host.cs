@@ -6,16 +6,16 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Sinks.XUnit.Injectable;
 using Serilog.Sinks.XUnit.Injectable.Extensions;
-using Soenneker.Fixtures.Unit;
+using Soenneker.TestHosts.Unit;
 using Soenneker.ServiceBus.Message.Registrars;
 using Soenneker.Utils.Test;
 using ILogger = Serilog.ILogger;
 
 namespace Soenneker.ServiceBus.Message.Tests;
 
-public class Fixture : UnitFixture
+public class Host : UnitTestHost
 {
-    public override async System.Threading.Tasks.ValueTask InitializeAsync()
+    public override async Task InitializeAsync()
     {
         SetupIoC(Services);
 

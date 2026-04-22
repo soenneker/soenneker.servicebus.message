@@ -3,28 +3,27 @@ using Azure.Messaging.ServiceBus;
 using AwesomeAssertions;
 using Soenneker.ServiceBus.Message.Abstract;
 using Soenneker.ServiceBus.Message.Tests.Messages;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 
 namespace Soenneker.ServiceBus.Message.Tests;
 
-[Collection("ServiceBusMessageUtilCollection")]
-public class ServiceBusMessageUtilTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class ServiceBusMessageUtilTests : HostedUnitTest
 {
     private readonly IServiceBusMessageUtil _util;
 
-    public ServiceBusMessageUtilTests(Fixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
+    public ServiceBusMessageUtilTests(Host host) : base(host)
     {
         _util = Resolve<IServiceBusMessageUtil>();
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
     }
 
-    [Fact]
+    [Test]
     public void BuildMessage_should_build_a_message()
     {
         var testMessage = new TestMessage
