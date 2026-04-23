@@ -4,8 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Sinks.XUnit.Injectable;
-using Serilog.Sinks.XUnit.Injectable.Extensions;
 using Soenneker.TestHosts.Unit;
 using Soenneker.ServiceBus.Message.Registrars;
 using Soenneker.Utils.Test;
@@ -29,10 +27,7 @@ public class Host : UnitTestHost
         services.TryAdd(ServiceDescriptor.Singleton<ILoggerFactory, LoggerFactory>());
         services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
 
-        var injectableTestOutputSink = new InjectableTestOutputSink();
-
         ILogger serilogLogger = new LoggerConfiguration()
-            .WriteTo.InjectableTestOutput(injectableTestOutputSink)
             .CreateLogger();
 
         Log.Logger = serilogLogger;
