@@ -10,6 +10,13 @@ namespace Soenneker.ServiceBus.Message.Abstract;
 /// </summary>
 public interface IServiceBusMessageUtil
 {
+    /// <summary>
+    /// Builds message.
+    /// </summary>
+    /// <typeparam name="TMessage">The TMessage type.</typeparam>
+    /// <param name="message">The message.</param>
+    /// <param name="type">The type.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message;
 }
