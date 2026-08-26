@@ -44,7 +44,7 @@
     <ItemGroup>
         <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.2" />
         <PackageReference Include="Soenneker.Extensions.Configuration" Version="4.0.861" />
-        <PackageReference Include="Soenneker.Messages.Base" Version="4.0.1156" />
-        <PackageReference Include="Soenneker.Utils.Json" Version="4.0.2643" />
+        <PackageReference Include="Soenneker.Messages.Base" Version="4.0.1157" />
+        <PackageReference Include="Soenneker.Utils.Json" Version="4.0.2644" />
     </ItemGroup>
 </Project>
