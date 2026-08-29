@@ -13,10 +13,10 @@ public interface IServiceBusMessageUtil
     /// <summary>
     /// Builds message.
     /// </summary>
-    /// <typeparam name="TMessage">The TMessage type.</typeparam>
-    /// <param name="message">The message.</param>
-    /// <param name="type">The type.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <typeparam name="TMessage">Type of message used by the operation.</typeparam>
+    /// <param name="message">Message content to send.</param>
+    /// <param name="type">Runtime type to inspect or construct.</param>
+    /// <returns>The resulting service Bus Message.</returns>
     [Pure]
     ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message;
 }

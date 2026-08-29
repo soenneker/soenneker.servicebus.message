@@ -10,10 +10,10 @@ namespace Soenneker.ServiceBus.Message.Registrars;
 public static class ServiceBusMessageUtilRegistrar
 {
     /// <summary>
-    /// Adds service bus message util as singleton.
+    /// Registers Service Bus Message Util with a singleton lifetime.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddServiceBusMessageUtilAsSingleton(this IServiceCollection services)
     {
         services.TryAddSingleton<IServiceBusMessageUtil, ServiceBusMessageUtil>();
@@ -22,10 +22,10 @@ public static class ServiceBusMessageUtilRegistrar
     }
 
     /// <summary>
-    /// Adds service bus message util as scoped.
+    /// Registers Service Bus Message Util with a scoped lifetime.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddServiceBusMessageUtilAsScoped(this IServiceCollection services)
     {
         services.TryAddScoped<IServiceBusMessageUtil, ServiceBusMessageUtil>();
