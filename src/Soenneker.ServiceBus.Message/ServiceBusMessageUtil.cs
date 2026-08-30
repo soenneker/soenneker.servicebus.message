@@ -121,10 +121,16 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
 
         if (_log)
         {
-            // Serialize only if you're going to log the payload.
-            string? serialized = JsonUtil.Serialize(message, _jsonOptionType, libraryType);
+            try
+            {
+                string? serialized = JsonUtil.Serialize(message, _jsonOptionType, libraryType);
 
-            _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}, Message: {Message}", type, serialized);
+                _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}, Message: {Message}", type, serialized);
+            }
+            catch
+            {
+                _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}; payload could not be serialized for logging", type);
+            }
         }
         else
         {
