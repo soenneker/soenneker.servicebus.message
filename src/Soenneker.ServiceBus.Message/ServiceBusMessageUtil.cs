@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.Serialization;
 using System.Text;
 using Azure.Messaging.ServiceBus;
@@ -11,7 +11,6 @@ using Soenneker.Utils.Json;
 
 namespace Soenneker.ServiceBus.Message;
 
-/// <inheritdoc cref="IServiceBusMessageUtil"/>
 public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
 {
     private const int _messageLimitBytes = 260_096;
