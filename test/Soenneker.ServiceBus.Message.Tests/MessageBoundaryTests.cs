@@ -20,7 +20,7 @@ public class MessageBoundaryTests
     [Test]
     public void SerializationPreservesDerivedPropertiesAndUtf8Limit()
     {
-        var builder = new ServiceBusMessageUtil(Fixture.Config(), NullLogger<ServiceBusMessageUtil>.Instance);
+        var builder = new ServiceBusMessageUtil(TestJsonContext.Default, Fixture.Config(), NullLogger<ServiceBusMessageUtil>.Instance);
         foreach (bool newtonsoft in new[] { false, true })
         {
             Soenneker.Messages.Base.Message model = Payload.Create("日本語🙂"); model.NewtonsoftSerialize = newtonsoft;
@@ -34,7 +34,7 @@ public class MessageBoundaryTests
     [Test]
     public void BodyLimitAcceptsExactBoundaryForBothSerializers()
     {
-        var builder = new ServiceBusMessageUtil(Fixture.Config(), NullLogger<ServiceBusMessageUtil>.Instance);
+        var builder = new ServiceBusMessageUtil(TestJsonContext.Default, Fixture.Config(), NullLogger<ServiceBusMessageUtil>.Instance);
         foreach (bool newtonsoft in new[] { false, true })
         {
             var model = Payload.Create(""); model.NewtonsoftSerialize = newtonsoft;

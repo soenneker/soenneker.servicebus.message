@@ -7,6 +7,8 @@ namespace Soenneker.ServiceBus.Message.Abstract;
 /// <summary>
 /// Builds Azure Service Bus messages from Soenneker message envelopes.
 /// </summary>
+/// <remarks>Registered JSON contexts contribute generated metadata for message types. The primary JSON context is used when no contributed context handles a type.</remarks>
+/// <remarks>Register a source-generated JsonSerializerContext covering application payloads. JSON contracts are never discovered through reflection.</remarks>
 public interface IServiceBusMessageUtil
 {
     /// <summary>

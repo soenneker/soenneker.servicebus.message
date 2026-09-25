@@ -37,6 +37,7 @@ public class Host : UnitTestHost
             builder.AddSerilog(dispose: false);
         });
 
+        services.AddSingleton<System.Text.Json.Serialization.JsonSerializerContext>(Audit.TestJsonContext.Default);
         services.AddSingleton(config);
         services.AddServiceBusMessageUtilAsSingleton();
     }
