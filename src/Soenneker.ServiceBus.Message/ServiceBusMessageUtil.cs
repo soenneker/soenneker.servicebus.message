@@ -8,10 +8,9 @@ using System.Text;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Soenneker.Enums.JsonLibrary;
-using Soenneker.Enums.JsonOptions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Soenneker.ServiceBus.Message.Abstract;
-using Soenneker.Utils.Json;
 
 namespace Soenneker.ServiceBus.Message;
 
@@ -25,7 +24,11 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
 
     private readonly JsonSerializerContext[] _jsonContexts;
     private readonly bool _log;
-    private readonly JsonOptionType _jsonOptionType;
+    private static readonly JsonSerializerSettings _newtonsoftSettings = new()
+    {
+        NullValueHandling = NullValueHandling.Ignore,
+        Converters = { new StringEnumConverter() }
+    };
     private readonly ILogger<ServiceBusMessageUtil> _logger;
 
     public ServiceBusMessageUtil(JsonSerializerContext jsonContext, IConfiguration config, ILogger<ServiceBusMessageUtil> logger, IEnumerable<JsonSerializerContext>? jsonContexts = null)
@@ -36,7 +39,6 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
         _logger = logger;
         _jsonContexts = jsonContexts?.ToArray() ?? [];
         _log = config.GetValue<bool>("Azure:ServiceBus:Log");
-        _jsonOptionType = _log ? JsonOptionType.Pretty : JsonOptionType.Web;
     }
 
     public ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message
@@ -80,7 +82,7 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
         }
         catch (Exception ex)
         {
-            LogCriticalError(ex, type, message, JsonLibraryType.SystemTextJson);
+            LogCriticalError(ex, type, message, false);
             return null;
         }
     }
@@ -90,7 +92,7 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
         try
         {
             // Required for messages explicitly opting into Newtonsoft contracts and converters.
-            string? serialized = JsonUtil.Serialize(message, _jsonOptionType, JsonLibraryType.Newtonsoft);
+            string serialized = JsonConvert.SerializeObject(message, _newtonsoftSettings);
 
             if (serialized is null)
                 throw new SerializationException("Couldn't serialize message of type " + type);
@@ -119,7 +121,7 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
         }
         catch (Exception ex)
         {
-            LogCriticalError(ex, type, message, JsonLibraryType.Newtonsoft);
+            LogCriticalError(ex, type, message, true);
             return null;
         }
     }
@@ -135,7 +137,7 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
 
         return _jsonContext.GetTypeInfo(type) ?? throw new NotSupportedException($"No generated JSON metadata for {type}.");
     }
-    private void LogCriticalError(Exception ex, string type, object message, JsonLibraryType libraryType)
+    private void LogCriticalError(Exception ex, string type, object message, bool useNewtonsoft)
     {
         if (!_logger.IsEnabled(LogLevel.Critical))
             return;
@@ -144,8 +146,8 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
         {
             try
             {
-                string? serialized = libraryType == JsonLibraryType.Newtonsoft
-                    ? JsonUtil.Serialize(message, _jsonOptionType, libraryType)
+                string? serialized = useNewtonsoft
+                    ? JsonConvert.SerializeObject(message, _newtonsoftSettings)
                     : System.Text.Json.JsonSerializer.Serialize(message, GetTypeInfo(message.GetType()));
 
                 _logger.LogCritical(ex, "== ServiceBusMessageUtil: Error building service bus message. Type: {Type}, Message: {Message}", type, serialized);

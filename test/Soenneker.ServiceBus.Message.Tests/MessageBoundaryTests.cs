@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Soenneker.ServiceBus.Message;
-using Soenneker.Utils.Json;
-using Soenneker.Enums.JsonLibrary;
+using Newtonsoft.Json;
 
 namespace Audit;
 
@@ -25,7 +24,10 @@ public class MessageBoundaryTests
         {
             Soenneker.Messages.Base.Message model = Payload.Create("日本語🙂"); model.NewtonsoftSerialize = newtonsoft;
             var built = builder.BuildMessage(model, model.Type)!;
-            Check(JsonUtil.Deserialize<Payload>(built.Body.ToString(), newtonsoft ? JsonLibraryType.Newtonsoft : JsonLibraryType.SystemTextJson)!.Content == "日本語🙂", "Derived content or Unicode lost");
+            Payload? roundTrip = newtonsoft
+                ? JsonConvert.DeserializeObject<Payload>(built.Body.ToString())
+                : System.Text.Json.JsonSerializer.Deserialize(built.Body.ToString(), TestJsonContext.Default.Payload);
+            Check(roundTrip!.Content == "日本語🙂", "Derived content or Unicode lost");
             var tooBig = Payload.Create(new string('x', 260_096)); tooBig.NewtonsoftSerialize = newtonsoft;
             Check(builder.BuildMessage(tooBig, tooBig.Type) is null, "Oversized body accepted");
         }
