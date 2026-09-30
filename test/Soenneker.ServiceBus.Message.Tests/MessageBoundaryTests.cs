@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Soenneker.ServiceBus.Message;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Audit;
 
@@ -17,35 +17,31 @@ public class MessageBoundaryTests
         if (!condition) throw new InvalidOperationException(message);
     }
     [Test]
-    public void SerializationPreservesDerivedPropertiesAndUtf8Limit()
+    [Arguments(false)]
+    [Arguments(true)]
+    public void SerializationPreservesDerivedPropertiesAndUtf8Limit(bool useContext)
     {
-        var builder = new ServiceBusMessageUtil(TestJsonContext.Default, Fixture.Config(), NullLogger<ServiceBusMessageUtil>.Instance);
-        foreach (bool newtonsoft in new[] { false, true })
-        {
-            Soenneker.Messages.Base.Message model = Payload.Create("日本語🙂"); model.NewtonsoftSerialize = newtonsoft;
-            var built = builder.BuildMessage(model, model.Type)!;
-            Payload? roundTrip = newtonsoft
-                ? JsonConvert.DeserializeObject<Payload>(built.Body.ToString())
-                : System.Text.Json.JsonSerializer.Deserialize(built.Body.ToString(), TestJsonContext.Default.Payload);
-            Check(roundTrip!.Content == "日本語🙂", "Derived content or Unicode lost");
-            var tooBig = Payload.Create(new string('x', 260_096)); tooBig.NewtonsoftSerialize = newtonsoft;
-            Check(builder.BuildMessage(tooBig, tooBig.Type) is null, "Oversized body accepted");
-        }
+        var builder = new ServiceBusMessageUtil(Fixture.Config(), NullLogger<ServiceBusMessageUtil>.Instance);
+        Soenneker.Messages.Base.Message model = Payload.Create("日本語🙂");
+        var built = (useContext ? builder.BuildMessage(model, model.Type, TestJsonContext.Default) : builder.BuildMessage(model, model.Type))!;
+        Payload? roundTrip = JsonSerializer.Deserialize(built.Body.ToString(), TestJsonContext.Default.Payload);
+        Check(roundTrip!.Content == "日本語🙂", "Derived content or Unicode lost");
+        var tooBig = Payload.Create(new string('x', 260_096));
+        Check((useContext ? builder.BuildMessage(tooBig, tooBig.Type, TestJsonContext.Default) : builder.BuildMessage(tooBig, tooBig.Type)) is null, "Oversized body accepted");
     }
 
     [Test]
-    public void BodyLimitAcceptsExactBoundaryForBothSerializers()
+    [Arguments(false)]
+    [Arguments(true)]
+    public void BodyLimitAcceptsExactBoundaryForBothMetadataPaths(bool useContext)
     {
-        var builder = new ServiceBusMessageUtil(TestJsonContext.Default, Fixture.Config(), NullLogger<ServiceBusMessageUtil>.Instance);
-        foreach (bool newtonsoft in new[] { false, true })
-        {
-            var model = Payload.Create(""); model.NewtonsoftSerialize = newtonsoft;
-            int overhead = builder.BuildMessage(model, model.Type)!.Body.ToMemory().Length;
-            model.Content = new string('x', 260_096 - overhead);
-            Check(builder.BuildMessage(model, model.Type)!.Body.ToMemory().Length == 260_096, "Exact boundary rejected");
-            model.Content += "x";
-            Check(builder.BuildMessage(model, model.Type) is null, "Body one byte over limit accepted");
-        }
+        var builder = new ServiceBusMessageUtil(Fixture.Config(), NullLogger<ServiceBusMessageUtil>.Instance);
+        var model = Payload.Create("");
+        int overhead = (useContext ? builder.BuildMessage(model, model.Type, TestJsonContext.Default) : builder.BuildMessage(model, model.Type))!.Body.ToMemory().Length;
+        model.Content = new string('x', 260_096 - overhead);
+        Check((useContext ? builder.BuildMessage(model, model.Type, TestJsonContext.Default) : builder.BuildMessage(model, model.Type))!.Body.ToMemory().Length == 260_096, "Exact boundary rejected");
+        model.Content += "x";
+        Check((useContext ? builder.BuildMessage(model, model.Type, TestJsonContext.Default) : builder.BuildMessage(model, model.Type)) is null, "Body one byte over limit accepted");
     }
 }
 public sealed class Payload : Soenneker.Messages.Base.Message

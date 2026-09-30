@@ -62,11 +62,7 @@ This builder does not map `payload.Id` to `ServiceBusMessage.MessageId`, set `Co
 
 ## Serialization and size behavior
 
-System.Text.Json is used by default. Set the payload's `NewtonsoftSerialize` property to `true` to use Newtonsoft.Json instead:
-
-```csharp
-payload.NewtonsoftSerialize = true;
-```
+Messages are serialized using System.Text.Json.
 
 Messages whose serialized body exceeds 260,096 bytes are rejected and return `null`. That check covers the body only; it does not calculate the broker size of application properties or other AMQP overhead.
 

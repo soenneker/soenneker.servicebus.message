@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 using System.Diagnostics.Contracts;
 using Azure.Messaging.ServiceBus;
 
@@ -7,9 +8,8 @@ namespace Soenneker.ServiceBus.Message.Abstract;
 /// <summary>
 /// Builds Azure Service Bus messages from Soenneker message envelopes.
 /// </summary>
-/// <remarks>Registered JSON contexts contribute generated metadata for message types. The primary JSON context is used when no contributed context handles a type.</remarks>
-/// <remarks>Register a source-generated JsonSerializerContext covering application payloads.
-/// Messages explicitly opting into NewtonsoftSerialize retain Newtonsoft contracts and require reflection support.</remarks>
+/// <remarks>Messages use System.Text.Json. The default method uses reflection-based web JSON defaults.
+/// Pass a generated context to the method overload for trimmed or Native AOT applications.</remarks>
 public interface IServiceBusMessageUtil
 {
     /// <summary>
@@ -21,4 +21,12 @@ public interface IServiceBusMessageUtil
     /// <returns>The resulting Service Bus message, or <see langword="null"/> when serialization fails or the body exceeds the size limit.</returns>
     [Pure]
     ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message;
+
+    /// <summary>Builds a message using generated metadata for the runtime message type.</summary>
+    /// <typeparam name="TMessage">The message envelope type.</typeparam>
+    /// <param name="message">Message content to send.</param>
+    /// <param name="type">The stable type stored in the message application properties.</param>
+    /// <param name="jsonContext">Generated metadata covering the message and its payload.</param>
+    /// <returns>The built message, or null when serialization fails or the body exceeds the size limit.</returns>
+    ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type, JsonSerializerContext jsonContext) where TMessage : Messages.Base.Message;
 }
