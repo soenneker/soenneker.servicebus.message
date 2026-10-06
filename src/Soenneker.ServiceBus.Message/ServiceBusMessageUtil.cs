@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System;
@@ -27,6 +28,8 @@ public sealed class ServiceBusMessageUtil : IServiceBusMessageUtil
         _log = config.GetValue<bool>("Azure:ServiceBus:Log");
     }
 
+    [RequiresUnreferencedCode("The legacy serializer uses reflection. Supply a generated JsonSerializerContext instead.")]
+    [RequiresDynamicCode("The legacy serializer may require runtime code generation. Supply a generated JsonSerializerContext instead.")]
     public ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message
     {
         return BuildMessageStjUtf8(message, type, static value => JsonUtil.SerializeToUtf8Bytes(value), static value => JsonUtil.Serialize(value));

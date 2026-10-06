@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System;
 using System.Text.Json.Serialization;
 using System.Diagnostics.Contracts;
@@ -20,6 +21,8 @@ public interface IServiceBusMessageUtil
     /// <param name="type">The stable message type stored in <c>ApplicationProperties["type"]</c>.</param>
     /// <returns>The resulting Service Bus message, or <see langword="null"/> when serialization fails or the body exceeds the size limit.</returns>
     [Pure]
+    [RequiresUnreferencedCode("The legacy serializer uses reflection. Supply a generated JsonSerializerContext instead.")]
+    [RequiresDynamicCode("The legacy serializer may require runtime code generation. Supply a generated JsonSerializerContext instead.")]
     ServiceBusMessage? BuildMessage<TMessage>(TMessage message, string type) where TMessage : Messages.Base.Message;
 
     /// <summary>Builds a message using generated metadata for the runtime message type.</summary>
